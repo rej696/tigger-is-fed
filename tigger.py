@@ -3,6 +3,7 @@ import machine
 
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY_2, PEN_RGB565
 from pimoroni import RGBLED, Button
+from ntp import set_time
 
 display = PicoGraphics(display=DISPLAY_PICO_DISPLAY_2, pen_type=PEN_RGB565, rotate=0)
 display.set_backlight(0.8)
@@ -10,6 +11,7 @@ display.set_backlight(0.8)
 # set up constants for drawing
 WIDTH, HEIGHT = display.get_bounds()
 BLACK = display.create_pen(0, 0, 0)
+WHITE = display.create_pen(255, 255, 255)
 
 # what size steps to take around the colour wheel
 OFFSET = 0.0025
@@ -52,37 +54,39 @@ def main():
     # variable to keep track of the hue
     h = 0.0
     while True:
-        if button_a.read() or button_b.read() or button_x.read() or button_y.read():
-            tigger_text = FULL
+        try:
+            if button_a.read() or button_b.read() or button_x.read() or button_y.read():
+                tigger_text = FULL
+                set_time()
 
-        if counter < 50:
-            counter += 1
-            continue
+            if counter < 50:
+                counter += 1
+                continue
 
-        counter = 0
+            counter = 0
 
-        current_time = machine.RTC().datetime()
-        hour, minute, second = current_time[4], current_time[5], current_time[6]
-        if hour == 12 and minute == 0:
-            set_time()
+            current_time = machine.RTC().datetime()
+            hour, minute, second = current_time[4], current_time[5], current_time[6]
 
-        if hour == 6 and minute == 1:
-            tigger_text = FEED_ME
+            if hour == 6 and minute == 1:
+                tigger_text = FEED_ME
 
-        if hour == 16 and minute == 31:
-            tigger_text = FEED_ME
+            if hour == 16 and minute == 31:
+                tigger_text = FEED_ME
 
-        # increment the hue each time round the loop
-        h += OFFSET
+            # increment the hue each time round the loop
+            h += OFFSET
 
-        RAINBOW = display.create_pen_hsv(h, 1.0, 1.0)
-        display.set_pen(RAINBOW)
-        display.clear()
+            RAINBOW = display.create_pen_hsv(h, 1.0, 1.0)
+            display.set_pen(RAINBOW)
+            display.clear()
 
-        # Draw some black text
-        display.set_pen(BLACK)
-        display.text(tigger_text, 10, 10, 240, 6)
+            # Draw some black text
+            display.set_pen(BLACK)
+            display.text(tigger_text, 10, 10, 240, 6)
 
-        display.update()
+            display.update()
 
-        time.sleep(0.1)
+            time.sleep(0.1)
+        except:
+            pass

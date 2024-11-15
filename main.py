@@ -13,18 +13,32 @@ def setup_network():
     time.sleep(5)
     return wlan.isconnected()
 
-while not setup_network():
-    print("Cannot connect!")
+def pico_print(text):
+    print(text)
+    tigger.display.set_pen(tigger.BLACK)
+    tigger.display.clear()
+    tigger.display.set_pen(tigger.WHITE)
+    tigger.display.text(text, 10, 10, 240, 6)
 
-print("Connected!")
+connected = False
+while not connected:
+    try:
+        connected = setup_network()
+        if not connected:
+            pico_print("Connection Error!")
+    except:
+        time.sleep(5)
+        pico_print("Connection Error!")
+
+pico_print("Connected!")
 
 for i in range(5):
     try:
         time.sleep(5)
         set_time()
-        print("Updated RTC")
+        pico_print("Updated RTC")
         break
     except:
-        print("Could not set RTC on boot")
+        pico_print("Could not set RTC on boot")
 
 tigger.main()
